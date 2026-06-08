@@ -19,8 +19,17 @@ jobs:
 
       # ───────────────────────── 🔑 Secret Scanning ─────────────────────────
       - name: Gitleaks (secretos)
-        uses: gitleaks/gitleaks-action@v2
-        continue-on-error: true  # reporta, pero el gate final decide el build
+        run: |
+          docker run --rm -v "$PWD:/path" zricethezav/gitleaks:latest detect \
+            --source=/path --no-banner \
+            --report-format sarif --report-path /path/gitleaks.sarif || true
+
+      - name: Subir SARIF de Gitleaks
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gitleaks.sarif
+          category: gitleaks
 
       # ───────────────────────── 🐞 SAST (Semgrep) ──────────────────────────
       - name: Semgrep (SAST)
