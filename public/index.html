@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PagoFácil — Tu billetera digital</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- ============ Pantalla de login ============ -->
+    <section id="login-view" class="card">
+      <div class="brand">
+        <span class="logo">₽</span>
+        <h1>PagoFácil</h1>
+      </div>
+      <p class="subtitle">Ingresa a tu billetera digital</p>
+      <form id="login-form">
+        <label>Usuario
+          <input type="text" id="username" autocomplete="username" placeholder="ana" required />
+        </label>
+        <label>Contraseña
+          <input type="password" id="password" autocomplete="current-password" placeholder="••••••" required />
+        </label>
+        <button type="submit">Ingresar</button>
+        <p class="hint">Demo: <code>ana / ana123</code></p>
+        <p id="login-error" class="error"></p>
+      </form>
+    </section>
+
+    <!-- ============ Dashboard ============ -->
+    <section id="dashboard-view" class="card hidden">
+      <div class="dash-header">
+        <div>
+          <p class="welcome">Hola,</p>
+          <h2 id="user-name">—</h2>
+        </div>
+        <button id="logout-btn" class="ghost">Salir</button>
+      </div>
+
+      <div class="balance-box">
+        <p>Saldo disponible</p>
+        <h3 id="balance">S/ 0.00</h3>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h4>Transferir</h4>
+          <form id="transfer-form">
+            <input type="text" id="to" placeholder="Cuenta destino" required />
+            <input type="number" id="amount" placeholder="Monto" step="0.01" required />
+            <input type="text" id="note" placeholder="Concepto (opcional)" />
+            <button type="submit">Enviar</button>
+          </form>
+          <p id="transfer-result" class="muted"></p>
+        </div>
+
+        <div class="panel">
+          <h4>Comprobante</h4>
+          <p class="muted">Genera el comprobante de tu cuenta.</p>
+          <button id="receipt-btn" class="secondary">Generar comprobante</button>
+          <pre id="receipt-out" class="receipt"></pre>
+        </div>
+      </div>
+
+      <div class="panel full">
+        <h4>Últimos movimientos</h4>
+        <ul id="tx-list" class="tx"></ul>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot">PagoFácil · demo educativa DevSecOps · no usar en producción</footer>
+  <script src="app.js"></script>
+</body>
+</html>

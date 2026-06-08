@@ -1,0 +1,71 @@
+name: DevSecOps Pipeline — PagoFácil
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  security-events: write   # necesario para subir SARIF a la pestaña Security
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # Gitleaks necesita el historial completo
+
+      # ───────────────────────── 🔑 Secret Scanning ─────────────────────────
+      - name: Gitleaks (secretos)
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true  # reporta, pero el gate final decide el build
+
+      # ───────────────────────── 🐞 SAST (Semgrep) ──────────────────────────
+      - name: Semgrep (SAST)
+        run: |
+          python3 -m pip install --quiet semgrep
+          semgrep scan \
+            --config p/owasp-top-ten \
+            --config .semgrep.yml \
+            --sarif --output semgrep.sarif . || true
+
+      - name: Subir SARIF de Semgrep
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+
+      # ───────────────────────── 📦 SCA (Trivy) ─────────────────────────────
+      - name: Instalar dependencias (genera/usa lockfile)
+        run: npm ci || npm install
+
+      - name: Trivy (SCA — dependencias)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          format: sarif
+          output: trivy.sarif
+        continue-on-error: true
+
+      - name: Subir SARIF de Trivy
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy
+
+      # ───────────────────────── 🚦 Quality Gate ────────────────────────────
+      # Rompe el build si hay alguna vulnerabilidad CRITICAL (la CVE de lodash).
+      - name: Quality Gate (falla en CRITICAL)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL
+          exit-code: 1
+          ignore-unfixed: false

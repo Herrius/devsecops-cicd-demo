@@ -1,0 +1,40 @@
+# Reglas custom de respaldo para PagoFácil (modo taint).
+# Rastrean la entrada del usuario (req.body / req.query / req.params) hasta el
+# sink peligroso, aunque pase por variables intermedias. Garantizan que el SAST
+# detecte las vulns plantadas aunque el ruleset del registro no cubra el sink
+# exacto de node:sqlite. Escribir reglas propias es práctica habitual en DevSecOps.
+rules:
+  - id: pagofacil-sql-injection
+    languages: [javascript]
+    severity: ERROR
+    mode: taint
+    message: >-
+      Posible SQL Injection: entrada del usuario llega a una consulta SQL sin
+      parametrizar. Usa sentencias preparadas con placeholders (?).
+    metadata:
+      cwe: "CWE-89: Improper Neutralization of Special Elements used in an SQL Command"
+      owasp: "A03:2021 - Injection"
+    pattern-sources:
+      - pattern: req.body
+      - pattern: req.query
+      - pattern: req.params
+    pattern-sinks:
+      - pattern: $DB.prepare(...)
+
+  - id: pagofacil-command-injection
+    languages: [javascript]
+    severity: ERROR
+    mode: taint
+    message: >-
+      Posible Command Injection: entrada del usuario llega a un comando de
+      shell. Evita exec(); usa execFile() pasando los argumentos por separado.
+    metadata:
+      cwe: "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+      owasp: "A03:2021 - Injection"
+    pattern-sources:
+      - pattern: req.body
+      - pattern: req.query
+      - pattern: req.params
+    pattern-sinks:
+      - pattern: exec(...)
+      - pattern: $CP.exec(...)
