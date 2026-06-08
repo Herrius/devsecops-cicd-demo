@@ -114,17 +114,29 @@ Quality Gate (falla en CRITICAL) → Process completed with exit code 1
 
 ## 4. CAPTURAS (mostrar como slides si algo falla)
 
-Carpeta: `docs/plan-b/capturas/`
+Carpeta: `docs/plan-b/capturas/`. El panel `02` es el respaldo más confiable:
+no depende de que GitHub cargue ni de estar logueado; contiene todos los datos
+reales del run.
 
-| Archivo | Qué muestra | Cuándo usarla |
-|---|---|---|
-| `01-app-login.png` | La app PagoFácil corriendo (UI de login) | Si no levanta el server en vivo |
-| `02-resultados-panel.png` | Panel-resumen con los 4 hallazgos + logs | **Slide principal de resultados** |
-| `03-repo-home.png` | Home del repo en GitHub | Para mostrar el código/estructura |
-| `04-actions-run.png` | Corrida de Actions en **rojo** (Failure, exit code 1) | **Prueba de que el Quality Gate rompe el build** |
+### 01 — La app PagoFácil corriendo (UI de login)
+*Cuándo usarla: si no levanta el server en vivo.*
 
-> El panel `02` es el respaldo más confiable: no depende de que GitHub cargue ni
-> de estar logueado; contiene todos los datos reales del run.
+![App PagoFácil — login](plan-b/capturas/01-app-login.png)
+
+### 02 — Panel-resumen de resultados  ⭐ slide principal
+*Todos los hallazgos + logs exactos en una sola imagen.*
+
+![Panel de resultados DevSecOps](plan-b/capturas/02-resultados-panel.png)
+
+### 03 — Home del repositorio en GitHub
+*Para mostrar el código y la estructura del proyecto.*
+
+![Repo en GitHub](plan-b/capturas/03-repo-home.png)
+
+### 04 — Corrida de Actions en rojo (Failure, exit code 1)  ⭐
+*La prueba de que el Quality Gate rompe el build.*
+
+![Pipeline en rojo](plan-b/capturas/04-actions-run.png)
 
 ---
 
