@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><title>Resultados DevSecOps — PagoFácil</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: system-ui, "Segoe UI", sans-serif; background:#0b1220; color:#e2e8f0; padding:48px 56px; width:1400px; }
+  h1 { font-size:34px; margin-bottom:4px; }
+  h1 .pill { font-size:14px; background:#dc2626; padding:4px 12px; border-radius:20px; vertical-align:middle; margin-left:12px; }
+  .sub { color:#94a3b8; margin-bottom:32px; font-size:16px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:28px; }
+  .card { background:#111c30; border:1px solid #1e2d47; border-radius:16px; padding:22px; }
+  .card h2 { font-size:18px; display:flex; align-items:center; gap:8px; margin-bottom:14px; }
+  .badge { margin-left:auto; font-size:13px; background:#064e3b; color:#34d399; padding:3px 10px; border-radius:12px; }
+  .card .item { font-size:14px; padding:8px 0; border-bottom:1px solid #1e2d47; color:#cbd5e1; }
+  .card .item:last-child { border:0; }
+  .card .item code { background:#0b1220; padding:1px 6px; border-radius:5px; color:#7dd3fc; }
+  .crit { color:#f87171; font-weight:700; }
+  .log { background:#070d18; border:1px solid #1e2d47; border-radius:10px; padding:10px 14px; font-family:ui-monospace,monospace; font-size:13px; color:#a5b4fc; margin-top:10px; }
+  table { width:100%; border-collapse:collapse; background:#111c30; border-radius:16px; overflow:hidden; }
+  th,td { text-align:left; padding:14px 18px; border-bottom:1px solid #1e2d47; font-size:15px; }
+  th { background:#16243c; color:#93c5fd; }
+  .gate { margin-top:26px; background:#1c0f14; border:1px solid #7f1d1d; border-radius:14px; padding:18px 22px; font-size:16px; }
+  .gate b { color:#f87171; }
+  .foot { margin-top:24px; color:#64748b; font-size:13px; }
+</style></head>
+<body>
+  <h1>💳 PagoFácil — Resultados del Pipeline DevSecOps <span class="pill">BUILD FAILED ✕</span></h1>
+  <div class="sub">Repositorio público <code style="background:#111c30;padding:2px 8px;border-radius:6px;color:#7dd3fc">Herrius/devsecops-cicd-demo</code> · GitHub Actions · escáneres 100% gratuitos · 2026-06-08</div>
+
+  <table>
+    <tr><th>#</th><th>Vulnerabilidad</th><th>Ubicación</th><th>Herramienta</th><th>Estado</th></tr>
+    <tr><td>1</td><td>Secretos hardcodeados (JWT + API key de pago)</td><td><code>config.js</code></td><td>🔑 Gitleaks</td><td class="crit">DETECTADO ×2</td></tr>
+    <tr><td>2</td><td>SQL Injection</td><td><code>server.js:50</code> · /api/login</td><td>🐞 Semgrep (SAST)</td><td class="crit">DETECTADO</td></tr>
+    <tr><td>3</td><td>Command Injection</td><td><code>server.js:111</code> · /api/receipt</td><td>🐞 Semgrep (SAST)</td><td class="crit">DETECTADO</td></tr>
+    <tr><td>4</td><td>Dependencia vulnerable — lodash 4.17.4 · CVE-2019-10744 · CVSS 9.1</td><td><code>package-lock.json</code></td><td>📦 Trivy (SCA)</td><td class="crit">CRITICAL</td></tr>
+  </table>
+
+  <div class="grid" style="margin-top:24px;">
+    <div class="card">
+      <h2>🔑 Gitleaks <span class="badge">2 secretos</span></h2>
+      <div class="item">generic-api-key — <code>config.js</code> (JWT secret)</div>
+      <div class="item">generic-api-key — <code>config.js</code> (payment gateway key)</div>
+      <div class="log">WRN leaks found: 2</div>
+    </div>
+    <div class="card">
+      <h2>🐞 Semgrep <span class="badge">2 findings</span></h2>
+      <div class="item">pagofacil-sql-injection — <code>server.js:50</code> (CWE-89)</div>
+      <div class="item">pagofacil-command-injection — <code>server.js:111</code> (CWE-78)</div>
+      <div class="log">Ran 96 rules on 14 files: 2 findings</div>
+    </div>
+    <div class="card">
+      <h2>📦 Trivy <span class="badge">1 CRITICAL</span></h2>
+      <div class="item"><span class="crit">CVE-2019-10744</span> · lodash 4.17.4 → fix 4.17.12</div>
+      <div class="item">Prototype pollution en <code>defaultsDeep</code></div>
+      <div class="log">Quality Gate → Total: 1 (CRITICAL: 1)</div>
+    </div>
+  </div>
+
+  <div class="gate">🚦 <b>Quality Gate:</b> el build se detuvo con <b>exit-code 1</b> al encontrar 1 vulnerabilidad <b>CRITICAL</b> (CVE-2019-10744 de lodash). Ninguna vulnerabilidad crítica llega a producción — el control es automático.</div>
+
+  <div class="foot">Los hallazgos de los 3 escáneres se publican en formato SARIF en la pestaña <b>Security → Code scanning</b> del repositorio (gratis en repos públicos). Cierre en verde: aplicar los 4 fixes de <code>docs/SOLUCION.md</code>.</div>
+</body></html>
