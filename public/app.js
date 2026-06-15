@@ -61,9 +61,16 @@ $('transfer-form').addEventListener('submit', async (e) => {
     body: JSON.stringify({ to: $('to').value, amount: Number($('amount').value), note: $('note').value })
   });
   const data = await res.json();
-  $('transfer-result').textContent = res.ok
-    ? `✓ Transferencia de S/ ${data.transfer.amount} a ${data.transfer.to} registrada`
-    : (data.error || 'Error');
+  if (res.ok) {
+    $('transfer-result').textContent =
+      `✓ Transferencia de S/ ${Number(data.transfer.amount).toFixed(2)} a ${data.transfer.to} registrada`;
+    // Reflejar el gasto: actualizar saldo y recargar movimientos.
+    $('balance').textContent = 'S/ ' + Number(data.balance).toFixed(2);
+    $('transfer-form').reset();
+    loadTransactions();
+  } else {
+    $('transfer-result').textContent = data.error || 'Error';
+  }
 });
 
 // ---- Comprobante ----
