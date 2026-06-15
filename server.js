@@ -94,8 +94,35 @@ app.post('/api/transfer', auth, (req, res) => {
   if (!opts.to || !opts.amount) {
     return res.status(400).json({ error: 'Faltan datos de la transferencia' });
   }
-  // Lógica simplificada para la demo (no persiste).
-  res.json({ status: 'ok', transfer: opts });
+
+  const amount = Number(opts.amount);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return res.status(400).json({ error: 'El monto debe ser un número positivo' });
+  }
+
+  // Cuenta de origen = la del usuario autenticado (del JWT).
+  const sender = db.prepare(
+    'SELECT id, balance FROM users WHERE id = ?'
+  ).get(req.user.id);
+  if (!sender) return res.status(404).json({ error: 'Cuenta de origen no encontrada' });
+
+  if (sender.balance < amount) {
+    return res.status(400).json({ error: 'Saldo insuficiente' });
+  }
+
+  const newBalance = Number((sender.balance - amount).toFixed(2));
+  const description = opts.note
+    ? `Transferencia a ${opts.to} — ${opts.note}`
+    : `Transferencia a ${opts.to}`;
+  const createdAt = new Date().toISOString().slice(0, 10);
+
+  // El gasto se persiste: descuenta del saldo y queda como movimiento (monto negativo).
+  db.prepare('UPDATE users SET balance = ? WHERE id = ?').run(newBalance, sender.id);
+  db.prepare(
+    'INSERT INTO transactions (account_id, description, amount, created_at) VALUES (?, ?, ?, ?)'
+  ).run(sender.id, description, -amount, createdAt);
+
+  res.json({ status: 'ok', transfer: opts, balance: newBalance });
 });
 
 // ---------------------------------------------------------------------------
