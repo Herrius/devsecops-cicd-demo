@@ -25,8 +25,16 @@ jobs:
             -x ".cache/*" \
             -x "docs/plan-b/capturas/*"
 
+      # La versión 0.2.6 usaba Docker con openjdk:latest (imagen ya no disponible).
+      # 0.2.10+ está reescrita en TypeScript/JavaScript y no requiere Docker.
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
       - name: Veracode Upload and Scan
-        uses: veracode/veracode-uploadandscan-action@0.2.6
+        uses: veracode/veracode-uploadandscan-action@0.2.10
         with:
           appname: 'PagoFácil-Demo'
           createprofile: true
