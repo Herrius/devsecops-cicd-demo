@@ -1,0 +1,37 @@
+name: Veracode Static Scan — PagoFácil
+
+# Este workflow se dispara manualmente desde la pestaña Actions.
+# Veracode Static Scan tarda 10-30 min, por eso no se ejecuta en cada push.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  veracode-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Empaqueta el código fuente excluyendo lo que no necesita Veracode.
+      - name: Package source code
+        run: |
+          zip -r veracode-payload.zip . \
+            -x "*.git*" \
+            -x "node_modules/*" \
+            -x "*.zip" \
+            -x ".cache/*" \
+            -x "docs/plan-b/capturas/*"
+
+      - name: Veracode Upload and Scan
+        uses: veracode/veracode-uploadandscan-action@0.2.6
+        with:
+          appname: 'PagoFácil-Demo'
+          createprofile: true
+          filepath: 'veracode-payload.zip'
+          vid: '${{ secrets.VERACODE_API_ID }}'
+          vkey: '${{ secrets.VERACODE_API_KEY }}'
+          criticality: 'High'
+          scantimeout: 0   # 0 = no espera a que termine el scan; se revisa en el dashboard
