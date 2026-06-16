@@ -29,18 +29,23 @@ Para la exposición se recomienda:
 
 1. Abre el repo en GitHub: `https://github.com/Herrius/devsecops-cicd-demo`.
 2. Ve a **Settings → Secrets and variables → Actions**.
-3. Crea dos secrets:
+3. Asegúrate de estar en la pestaña **Secrets** (no Variables).
+4. Crea dos secrets:
    - `VERACODE_API_ID`
    - `VERACODE_API_KEY`
+
+> Captura de referencia: en Obsidian guarda la imagen como `github-secrets-veracode.png` junto a esta guía.
 
 ---
 
 ## 3. Ejecutar el workflow
 
+Una vez los secrets existen, el workflow ya puede autenticarse con Veracode:
+
 1. En el repo, ve a la pestaña **Actions**.
 2. Selecciona **Veracode Static Scan — PagoFácil**.
-3. Haz clic en **Run workflow**.
-4. El workflow empaqueta el código y lo sube a Veracode.
+3. Haz clic en **Run workflow → Run workflow**.
+4. GitHub empaquetará el código y lo subirá a Veracode usando tus credenciales.
 
 Con `scantimeout: 0` el workflow termina inmediatamente después de subir el código. El análisis se revisa directamente en el dashboard de Veracode.
 
