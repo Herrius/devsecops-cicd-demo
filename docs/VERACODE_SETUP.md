@@ -47,6 +47,8 @@ Una vez los secrets existen, el workflow ya puede autenticarse con Veracode:
 3. Haz clic en **Run workflow → Run workflow**.
 4. GitHub empaquetará el código y lo subirá a Veracode usando tus credenciales.
 
+> **Nota técnica:** el workflow usa `veracode-uploadandscan-action@0.2.10` y `actions/setup-java@v4`. La versión 0.2.6 fallaba porque dependía de la imagen Docker `openjdk:latest` (retirada); la 0.2.10 está reescrita en TypeScript y no usa Docker.
+
 Con `scantimeout: 0` el workflow termina inmediatamente después de subir el código. El análisis se revisa directamente en el dashboard de Veracode.
 
 ---
