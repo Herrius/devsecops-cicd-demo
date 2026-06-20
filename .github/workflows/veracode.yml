@@ -42,4 +42,9 @@ jobs:
           vid: '${{ secrets.VERACODE_API_ID }}'
           vkey: '${{ secrets.VERACODE_API_KEY }}'
           criticality: 'High'
-          scantimeout: 0   # 0 = no espera a que termine el scan; se revisa en el dashboard
+          # Espera hasta 30 min a que la plataforma termine y devuelva el veredicto.
+          # (antes era 0 = solo subía y terminaba en segundos, sin resultado real)
+          scantimeout: 30
+          # Rompe el workflow si el scan incumple la política -> gate de seguridad.
+          # Ponlo en false si quieres que el build quede verde y solo reportar.
+          failbuild: true
