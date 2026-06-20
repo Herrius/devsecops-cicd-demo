@@ -45,13 +45,12 @@ jobs:
           vid: '${{ secrets.VERACODE_API_ID }}'
           vkey: '${{ secrets.VERACODE_API_KEY }}'
           criticality: 'High'
-          # Espera hasta 30 min a que la plataforma termine y devuelva el veredicto.
-          # (antes era 0 = solo subía y terminaba en segundos, sin resultado real)
-          # NOTA: esta action (upload-and-scan) NO tiene parámetro para fallar el
-          # build por política; solo falla si el scan excede este timeout. El
-          # veredicto de política se revisa en el dashboard de Veracode.
-          # Para un gate duro en CI se usa veracode-pipeline-scan-action (fail_build).
-          scantimeout: 30
+          # scantimeout: 0 = sube el código y lanza el scan, pero NO espera el
+          # veredicto en el pipeline. El resultado se revisa en el dashboard de
+          # Veracode. Se usa 0 a propósito: la cuenta de esta demo tiene permisos
+          # limitados y al ESPERAR (scantimeout > 0) el scan devuelve "Access denied"
+          # al leer el resultado. Con 0 el workflow queda verde (flujo de la demo).
+          scantimeout: 0
           # Borra automáticamente un scan anterior atascado (incomplete/failed)
           # antes de iniciar uno nuevo. Evita el error:
           # "App not in state where new builds are allowed".
