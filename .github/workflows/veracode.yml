@@ -44,7 +44,8 @@ jobs:
           criticality: 'High'
           # Espera hasta 30 min a que la plataforma termine y devuelva el veredicto.
           # (antes era 0 = solo subía y terminaba en segundos, sin resultado real)
+          # NOTA: esta action (upload-and-scan) NO tiene parámetro para fallar el
+          # build por política; solo falla si el scan excede este timeout. El
+          # veredicto de política se revisa en el dashboard de Veracode.
+          # Para un gate duro en CI se usa veracode-pipeline-scan-action (fail_build).
           scantimeout: 30
-          # Rompe el workflow si el scan incumple la política -> gate de seguridad.
-          # Ponlo en false si quieres que el build quede verde y solo reportar.
-          failbuild: true
