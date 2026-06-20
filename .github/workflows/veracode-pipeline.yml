@@ -1,0 +1,73 @@
+name: Veracode Pipeline Scan — PagoFácil (ideal DevSecOps)
+
+# ──────────────────────────────────────────────────────────────────────────
+# FLUJO IDEAL DevSecOps (shift-left):
+#   - Corre en CADA Pull Request -> feedback rápido ANTES de mergear.
+#   - fail_build: rompe el PR si hay vulnerabilidades (gate de seguridad).
+#   - SARIF: los hallazgos aparecen en la pestaña Security del repo y
+#     anotados en el diff del PR, sin salir de GitHub.
+#   - baseline: se puede gatear solo lo NUEVO (no la deuda histórica/legacy).
+# Complementa al policy scan (veracode.yml), que es el registro oficial.
+# ──────────────────────────────────────────────────────────────────────────
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:        # permite probarlo a mano desde Actions
+
+permissions:
+  contents: read
+  security-events: write    # necesario para subir el SARIF a Code Scanning
+
+jobs:
+  pipeline-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      # Empaqueta el código fuente (app Node.js) para el scan.
+      - name: Package source code
+        run: |
+          zip -r veracode-payload.zip . \
+            -x "*.git*" \
+            -x "node_modules/*" \
+            -x "*.zip" \
+            -x ".cache/*" \
+            -x "docs/*"
+
+      # Pipeline Scan: rápido (segundos/min), devuelve resultados EN el pipeline.
+      - name: Veracode Pipeline Scan
+        id: pipeline-scan
+        uses: veracode/veracode-pipeline-scan-action@v1.0.22
+        with:
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
+          file: 'veracode-payload.zip'
+          # Gate: rompe el build si hay flaws de severidad alta o muy alta.
+          fail_build: true
+          fail_on_severity: 'Very High, High'
+          # Para gatear SOLO los hallazgos NUEVOS (ideal con código legacy):
+          # baseline_file: 'baseline.json'
+          summary_display: true
+          json_output: true
+          json_output_file: 'results.json'
+
+      # Convierte los resultados a SARIF. 'always()' para que corra aunque el
+      # paso anterior haya fallado por el gate.
+      - name: Convert results to SARIF
+        if: always()
+        uses: veracode/veracode-pipeline-scan-results-to-sarif@master
+        with:
+          scan-type: 'pipeline'
+          pipeline-results-json: 'results.json'
+          output-results-sarif: 'veracode-results.sarif'
+          finding-rule-level: '4:3:0'
+          noupload: 'true'        # subimos nosotros con codeql-action (más estándar)
+
+      # Publica los hallazgos en la pestaña Security -> Code scanning alerts.
+      - name: Upload SARIF to GitHub
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'veracode-results.sarif'
