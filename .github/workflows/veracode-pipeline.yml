@@ -44,9 +44,10 @@ jobs:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
           file: 'veracode-payload.zip'
-          # Gate: rompe el build si hay flaws de severidad alta o muy alta.
+          # Gate: rompe el build si el scan viola la política por defecto
+          # (que ya marca las severidades altas). Se evita fail_on_severity
+          # porque la action no entrecomilla "Very High" y rompe el comando.
           fail_build: true
-          fail_on_severity: 'Very High, High'
           # Para gatear SOLO los hallazgos NUEVOS (ideal con código legacy):
           # baseline_file: 'baseline.json'
           summary_display: true
