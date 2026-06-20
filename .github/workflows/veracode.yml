@@ -52,3 +52,8 @@ jobs:
           # veredicto de política se revisa en el dashboard de Veracode.
           # Para un gate duro en CI se usa veracode-pipeline-scan-action (fail_build).
           scantimeout: 30
+          # Borra automáticamente un scan anterior atascado (incomplete/failed)
+          # antes de iniciar uno nuevo. Evita el error:
+          # "App not in state where new builds are allowed".
+          # 1 = borra incomplete/sin-módulos/failed/canceled (seguro). 2 = más agresivo.
+          deleteincompletescan: 1
