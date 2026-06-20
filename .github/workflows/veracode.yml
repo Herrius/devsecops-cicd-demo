@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Empaqueta el código fuente excluyendo lo que no necesita Veracode.
       - name: Package source code
@@ -28,11 +28,14 @@ jobs:
       # La versión 0.2.6 usaba Docker con openjdk:latest (imagen ya no disponible).
       # 0.2.10+ está reescrita en TypeScript/JavaScript y no requiere Docker.
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '21'
 
+      # NOTA: esta action sigue en Node 20 (incluso la última 0.2.11). El warning
+      # "Node.js 20 is deprecated" para esta action NO se puede quitar desde aquí;
+      # desaparecerá cuando Veracode publique una versión en Node 24.
       - name: Veracode Upload and Scan
         uses: veracode/veracode-uploadandscan-action@0.2.10
         with:
