@@ -6,7 +6,7 @@
 
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const _ = require('lodash');
 const path = require('path');
 
@@ -35,19 +35,16 @@ function auth(req, res, next) {
 
 // ---------------------------------------------------------------------------
 //  POST /api/login
-//  ▶ VULN 2 — SQL Injection (detectable por Semgrep / SAST)
-//    La query se construye concatenando la entrada del usuario.
-//    PoC:  username = admin'--    (o:  ' OR '1'='1 )
+//  ✅ FIX VULN 2 — SQL Injection cerrada con consulta parametrizada.
+//    El dato del usuario va por placeholders (?), nunca concatenado al SQL.
 // ---------------------------------------------------------------------------
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body || {};
 
-  const query =
-    "SELECT id, username, full_name, balance FROM users " +
-    "WHERE username = '" + username + "' AND password = '" + password + "'";
-
   try {
-    const row = db.prepare(query).get();
+    const row = db.prepare(
+      'SELECT id, username, full_name, balance FROM users WHERE username = ? AND password = ?'
+    ).get(username, password);
     if (!row) return res.status(401).json({ error: 'Credenciales inválidas' });
 
     const token = jwt.sign(
@@ -127,17 +124,15 @@ app.post('/api/transfer', auth, (req, res) => {
 
 // ---------------------------------------------------------------------------
 //  GET /api/receipt
-//  ▶ VULN 3 — Command Injection (detectable por Semgrep / SAST)
-//    El parámetro del usuario se concatena dentro de un comando de shell.
-//    PoC:  ?account=1; id    →  ejecuta `id` en el servidor.
+//  ✅ FIX VULN 3 — Command Injection cerrada: sin shell y con el dato saneado.
+//    execFile no invoca shell, y 'account' se castea a número.
 // ---------------------------------------------------------------------------
 app.get('/api/receipt', auth, (req, res) => {
-  const account = req.query.account || '0';
-  const cmd = "echo 'Comprobante de la cuenta " + account + "' && date";
+  const account = Number(req.query.account) || 0;
 
-  exec(cmd, (err, stdout) => {
+  execFile('date', [], (err, stdout) => {
     if (err) return res.status(500).json({ error: 'No se pudo generar el comprobante' });
-    res.json({ receipt: stdout.trim() });
+    res.json({ receipt: `Comprobante de la cuenta ${account}\n${stdout.trim()}` });
   });
 });
 
